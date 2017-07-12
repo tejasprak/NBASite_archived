@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+{% load static %} <!-- New line -->
+
+<html>
+
+    <head>
+        <title>NBASite</title>
+    </head>
+
+    <body>
+        <form method="POST" class="post-form"> {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="save btn btn-default">Save</button>
+      </form>
+        <!-- <img src="{% static "teamimages/gsw.png" %}" alt="GSW Team Logo" /> -->
+
+    </body>
+
+</html>
