@@ -76,19 +76,27 @@ def getStatsforPlayer(firstName, lastName):
 
 
 def populate():
-    game_id = 21600001
-    game_end = 21601230
+    game_id = 26100001
+    game_end = 26101230
     while game_id != game_end:
         realgameid = "00" + str(game_id)
 
-        game = nba_py.game.Boxscore(realgameid, season='2016-17', season_type='Regular Season')
+        game = nba_py.game.Boxscore(realgameid, season='1961-62', season_type='Regular Season')
         player_names =  game.player_stats()['PLAYER_NAME']
         #print type(player_names)
         playerlist = player_names.tolist()
         #print playerlist
         for player in playerlist:
             print player
-            firstName, lastName = player.split(' ')
+            playernamename = str(player)
+            if(len(playernamename.split()) == 2):
+                firstName, lastName = player.split(' ')
+            if(len(playernamename.split()) == 1):
+                firstName = player
+                lastName = None
+            if(len(playernamename.split()) > 2):
+                #firstName, lastName, x = player.split(' ')
+                break
             ppgcareer = getStatsforPlayer(firstName, lastName)['PTS']
             playerinfo = repr(getInfoforPlayer(firstName, lastName))
             playerstats = repr(getStatsforPlayer(firstName, lastName))

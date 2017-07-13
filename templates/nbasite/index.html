@@ -56,17 +56,16 @@
     </div>
   </div>
 </nav>
-{% if players %}
-  <ul>
+    {% if players %}
+      <ul>
 
       {% for player in players %}
-        <li class = "list-group-item">{{ player.name }}</li>
-
-      {% endfor %}
-    </ul>
-    {% else %}
+        <li class = "list-group-item">{{ player }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
         <strong>There are no categories present.</strong>
-    {% endif %}
+      {% endif %}
 
         <!--<a href="{% url 'newPlayer' %}" class="top-menu">Add Player</a> -->
       <!--  <a href="{% url 'newPlayer' %}" class="btn btn-primary">Search for Player</a> -->

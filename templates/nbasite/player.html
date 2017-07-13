@@ -5,19 +5,14 @@
     </head>
 
     <body>
-        <h1>{{ player_name }}</h1>
-        {% if player %}
-            {% if pages %}
-            <ul>
-                {% for page in pages %}
-                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-                {% endfor %}
-            </ul>
-            {% else %}
-                <strong>No stats currently in player.</strong>
-            {% endif %}
-        {% else %}
-            The specified player {{ player_name }} does not exist!
-        {% endif %}
+
+      <h1>{{ player_name }}</h1>
+      <img src="{{image}}" alt="Image A" />
+        <ul>
+        {% for stat, play in player.items %}
+
+          <li> {{ stat}} {{ play }} </li>
+        {% endfor %}
+      </ul>
     </body>
 </html>
