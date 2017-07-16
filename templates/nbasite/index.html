@@ -2,6 +2,7 @@
 
 {% load static %} <!-- New line -->
 
+
 <html>
 
     <head>
@@ -9,7 +10,22 @@
       body {background-color: powderblue;}
       h1  {color: blue;}
       p    {color: red;}
+      table, th, td {
 
+    border: 1px solid black;
+}
+      .listlistlist {height: 500px;  position: fixed;
+  top: 94px;
+  left: 370px;
+  z-index: 999;
+  width: 65%;
+  height: 23px;}
+    .headingheadingheading {height: 500px;  position: fixed;
+top: 60px;
+left: 675px;
+z-index: 999;
+width: 65%;
+height: 23px;}
 
       </style>
 
@@ -57,15 +73,31 @@
   </div>
 </nav>
     {% if players %}
-      <ul>
-
+      <!-- <ul> -->
+      <strong>Top 25 All Time Career Scoring Average Leaders </strong>
+      <table width = "400">
       {% for player in players %}
-        <li class = "list-group-item">{{ player }}</li>
+      <!--  <li class = "list-group-item">{{ player }}</li> -->
+            <tr>
+           <td>{{ player }}</td>
+           </tr>
         {% endfor %}
-      </ul>
+      <!-- </ul> -->
+    </table>
+
       {% else %}
         <strong>There are no categories present.</strong>
       {% endif %}
+
+      <h4 class="headingheadingheading">Games Today</h4>
+
+      <ul class="listlistlist">
+        {% for game in all_games %}
+      <li class="list-group-item">
+        {{ game }}
+      </li>
+      {% endfor %}
+      </ul>
 
         <!--<a href="{% url 'newPlayer' %}" class="top-menu">Add Player</a> -->
       <!--  <a href="{% url 'newPlayer' %}" class="btn btn-primary">Search for Player</a> -->

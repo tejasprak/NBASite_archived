@@ -17,3 +17,12 @@ class Name(forms.ModelForm):
         model = Player
         ppg_percareer = "35"
         fields = ('name',)
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField(widget=forms.TextInput(attrs=
+                                {
+                                    'class':'datepicker'
+                                }))
+    end_date = forms.DateField(widget=forms.TextInput(attrs=
+                                {
+                                    'class':'datepicker'
+                                })) 

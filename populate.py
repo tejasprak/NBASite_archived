@@ -1,3 +1,7 @@
+# List of imported season: 2016-17,
+
+
+
 import os
 
 import pandas
@@ -75,13 +79,53 @@ def getStatsforPlayer(firstName, lastName):
 
 
 
-def populate():
-    game_id = 26100001
-    game_end = 26101230
+def populate(year):
+    year = year * 100000
+
+    year = 20000000 + year + 1
+    print year
+    game_id = year
+    game_end = 21501230
+    while game_id != game_end:
+        realgameid = "00" + str(game_id)
+        print realgameid
+        game = nba_py.game.Boxscore(str(realgameid), season='2016-2017', season_type='Regular Season')
+        player_names =  game.player_stats()['PLAYER_NAME']
+        #print hi
+        #print type(player_names)
+        playerlist = player_names.tolist()
+        #print playerlist
+        #print hi
+        for player in playerlist:
+            print player
+            playernamename = str(player)
+            firstName = ""
+            lastName = ""
+            if(len(playernamename.split()) == 2):
+                firstName, lastName = player.split(' ')
+            if(len(playernamename.split()) == 1):
+                firstName = player
+                lastName = None
+                print "hi"
+            if(len(playernamename.split()) > 2):
+                #firstName, lastName, x = player.split(' ')
+                break
+            ppgcareer = getStatsforPlayer(firstName, lastName)['PTS']
+            print "Hi"
+            combinedName = firstName + str(lastName)
+            playerinfo = repr(getInfoforPlayer(firstName, lastName))
+            playerstats = repr(getStatsforPlayer(firstName, lastName))
+            Player.objects.get_or_create(name=player,ppg_percareer=ppgcareer,personalInfo=playerinfo,PlayerCareerStats=playerstats, firstName = firstName, lastName = lastName, combinedName=combinedName)
+
+        game_id = game_id + 1
+
+def populate2():
+    game_id = 29300001
+    game_end = 29301230
     while game_id != game_end:
         realgameid = "00" + str(game_id)
 
-        game = nba_py.game.Boxscore(realgameid, season='1961-62', season_type='Regular Season')
+        game = nba_py.game.Boxscore(realgameid, season='1993-94', season_type='Regular Season')
         player_names =  game.player_stats()['PLAYER_NAME']
         #print type(player_names)
         playerlist = player_names.tolist()
@@ -104,10 +148,11 @@ def populate():
 
         game_id = game_id + 1
 
-
 if __name__ == '__main__':
     print "Starting NBA player population script..."
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nba.settings')
     django.setup()
     from nbasite.models import Player
-    populate()
+
+    populate(61)
+    #populate2()

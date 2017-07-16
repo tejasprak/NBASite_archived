@@ -14,9 +14,13 @@ import pprint
 
 class Player(models.Model):
     name = models.CharField(max_length=128, unique=True)
+
     ppg_percareer = models.CharField(max_length=5, unique=False)
     personalInfo = models.CharField(max_length=2048, unique=False)
     PlayerCareerStats = models.CharField(max_length=2048, unique=False)
+    firstName = models.CharField(max_length=128, unique=False)
+    lastName = models.CharField(max_length=128, unique=False)
+    combinedName = models.CharField(max_length=128, unique=False)
     def __unicode__(self):
         return self.name
 

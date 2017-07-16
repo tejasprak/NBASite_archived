@@ -1,17 +1,100 @@
 <!DOCTYPE html>
+{% load static %}
 <html>
     <head>
         <title>NBASite</title>
+        <style>
+        .namenamename {height: 500px;
+          position: absolute;
+          top: 125px;
+          left: 450px;}
+        .personalinfo {height: 500px;
+          position: absolute;
+          top: 300px;
+          left: -25px;
+          width: 500px}
+          .personalinfo2 {height: 500px;
+            position: absolute;
+            top: 300px;
+            left: 500px;
+            width: 500px}
+          .image{
+            position: absolute;
+            top: 80px;
+            left: 100px;}
+
+          .caption1 {
+            position:absolute;
+              left:75px;
+              top:220px
+          }
+          .caption2 {
+            position:absolute;
+              left:175px;
+              top:-80px
+          }
+        </style>
+        <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" media="screen">
     </head>
 
     <body>
+      <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">NBASite</a>
+    </div>
 
-      <h1>{{ player_name }}</h1>
-      <img src="{{image}}" alt="Image A" />
-        <ul>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{% url 'newPlayer' %}">Search for Player</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+      <img class ="image" src="{{image}}" alt="No Image Found" height="140" width="200"/>
+      <h3 class = "namenamename">{{ player_name }}</h1>
+<h3 class="caption1"> Personal Information </h3>
+      <ul class = "personalinfo">
+
+        <li class = "list-group-item"> Country: {{player1.COUNTRY}}</li>
+        <li class = "list-group-item"> Position: {{player1.POSITION}}</li>
+        <li class = "list-group-item"> Round: {{player1.DRAFT_ROUND}} Pick: {{player1.DRAFT_NUMBER}}, {{player1.DRAFT_YEAR}}</li>
+        <li class = "list-group-item"> Seasons Played: {{player1.SEASON_EXP}}</li>
+        <li class = "list-group-item"> School: {{player1.SCHOOL}}</li>
+        <li class = "list-group-item"> Birthdate: {{player1.BIRTHDATE}}</li>
+        <li class = "list-group-item"> Height: {{player1.HEIGHT}}</li>
+        <li class = "list-group-item"> Weight: {{player1.WEIGHT}}</li>
+
+      </ul>
+        <ul class="personalinfo2">
+
+          <h3 class="caption2"> Career Averages </h3>
         {% for stat, play in player.items %}
 
-          <li> {{ stat}} {{ play }} </li>
+          <li class="list-group-item"> {{ stat}} {{ play }} </li>
         {% endfor %}
       </ul>
     </body>
