@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+{% load static %} <!-- New line -->
+
+<html>
+
+    <head>
+        <title>NBASite</title>
+        <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" media="screen">
+        <style>
+        .image{
+          position:absolute;
+          top:70px;
+          left:220px;
+        }
+        .image2{
+          position:absolute;
+          top:70px;
+          left:1020px;
+        }
+        .heading{
+          position:absolute;
+          top:85px;
+          left:620px;
+        }
+        .score1{
+          position:absolute;
+          top:150px;
+          left:255px;
+        }
+        .score2 {
+          position:absolute;
+          top:150px;
+          left:1045px;
+        }
+        </style>
+    </head>
+
+    <body>
+      <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../../">NBASite</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#">Draft<span class="sr-only">(current)</span></a></li>
+        <li class="active"><a href="../../game_finder">Game Finder</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{% url 'newPlayer' %}">Search for Player</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+        <br><br><br><br>
+        <img class="image" src="{{url1}}" height="100" width="100">
+        <img class="image2" src="{{url2}}" height="100" width="100">
+        <h3 class="heading">vs</h3>
+        <h1 align="middle">Basic Info</h1>
+        {{game | safe}}
+        <h1 align="middle">Box Score</h1>
+        {{players | safe}}
+        <h3 class="score1">{{team1pts}}</h3>
+        <h3 class="score2">{{team2pts}}</h3>
+      </form>
+        <!-- <img src="{% static "teamimages/gsw.png" %}" alt="GSW Team Logo" /> -->
+
+    </body>
+
+</html>

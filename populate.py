@@ -1,6 +1,7 @@
-# List of imported season: 2016-17,
+# List of imported season: 2016-17, 1961-62, 1984-85
 
 
+#more efficient population system
 
 import os
 
@@ -11,9 +12,11 @@ from nba_py import constants
 from nba_py import player
 from nba_py import league
 from nba_py import game
+from nba_py import team
 import json
 import pprint
 import django
+import requests
 
 def statleader(season, stat2):
     playerstats = {}
@@ -26,6 +29,19 @@ def statleader(season, stat2):
         playerstats[x] = stat.json['resultSet']['rowSet'][0][i]
         i = i+1
     playerstats[u'Name'] = playerstats['PLAYER']
+    return playerstats
+def getInfoforPlayerID(playerid):
+    playerstats = {}
+    playeri3d = playerid
+    stats = nba_py.player.PlayerSummary(playeri3d)
+    #print stats
+    headers = nba_py.player.PlayerSummary(playeri3d).json['resultSets'][0]['headers']
+    #print headers
+    i = 0
+    for x in headers:
+        playerstats[x] = stats.json['resultSets'][0]['rowSet'][0][i]
+        i = i+1
+    #print playerstats
     return playerstats
 def getInfoforPlayer(firstName, lastName):
     playerstats = {}
@@ -56,6 +72,24 @@ def getStatsforPlayer(firstName, lastName):
     #print playerstats
     playerstats['firstName'] = firstName
     playerstats['lastName'] = lastName
+    return playerstats
+def getStatsforPlayerID(playerid):
+    playerstats = {}
+    playeri3d = playerid
+    joe =  nba_py.player.PlayerCareer(playeri3d, per_mode='PerGame', league_id='00')
+    joe = joe.regular_season_career_totals()
+    headers = joe.columns.values
+    stats = joe.values.tolist()[0]
+    #print stats[0]
+    i = 0
+    for x in headers:
+        #rint stats[i]
+        playerstats[x] = stats[i]
+        i = i+1
+    #print playerstats
+    #print playerstats
+    #playerstats['firstName'] = firstName
+    #playerstats['lastName'] = lastName
     return playerstats
 #joe = statleader('1961-62', 'PTS')
 #print joe['Name']
@@ -147,12 +181,51 @@ def populate2():
             Player.objects.get_or_create(name=player,ppg_percareer=ppgcareer,personalInfo=playerinfo,PlayerCareerStats=playerstats)
 
         game_id = game_id + 1
+def population():
+    #teams = json.load("teams.json")
+    r = requests.get("https://raw.githubusercontent.com/bttmly/nba/master/data/teams.json")
+    r = r.json()
+    i = 0
+    teams = []
+    while i < 30:
+        teams.append(r[i]['teamId'])
+        i = i+1
+    for team in teams:
+        roster = nba_py.team.TeamCommonRoster(team, season='1984-85').roster()
+        rosterlist = roster.values.tolist()
+        #print len(rosterlist)
+        f = 0
+        while f < len(rosterlist):
+            ids = roster.values.tolist()[f][12]
+            #print ids
+            name = roster.values.tolist()[f][3]
+            print name
+            #print name
+            ppgcareer = getStatsforPlayerID(ids)['PTS']
+            personal = repr(getInfoforPlayerID(ids))
+            playerstats = repr(getStatsforPlayerID(ids))
+            first =  getInfoforPlayerID(ids)['FIRST_NAME']
+            last =  getInfoforPlayerID(ids)['LAST_NAME']
+            combinedname = first + last
+            #print combinedname
+            Player.objects.get_or_create(name=name,ppg_percareer=ppgcareer,personalInfo=personal,PlayerCareerStats=playerstats,firstName=first,lastName=last,combinedName=combinedname)
 
+            #first =
+            f = f + 1
 if __name__ == '__main__':
     print "Starting NBA player population script..."
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nba.settings')
     django.setup()
     from nbasite.models import Player
-
-    populate(61)
+    population()
+    #populate(61)
     #populate2()
+
+#name = models.CharField(max_length=128, unique=True)
+
+#ppg_percareer = models.CharField(max_length=5, unique=False)
+#ersonalInfo = models.CharField(max_length=2048, unique=False)
+##PlayerCareerStats = models.CharField(max_length=2048, unique=False)
+#firstName = models.CharField(max_length=128, unique=False)
+#lastName = models.CharField(max_length=128, unique=False)
+#combinedName = models.CharField(max_length=128, unique=False)

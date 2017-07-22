@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 {% load static %} <!-- New line -->
+{% load app_filters %}
 
 
 <html>
@@ -50,8 +51,8 @@ height: 23px;}
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-        <li><a href="#">Link</a></li>
+        <li><a href="draft/">Draft <span class="sr-only">(current)</span></a></li>
+        <li><a href="game_finder">Game Finder</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
@@ -79,7 +80,8 @@ height: 23px;}
       {% for player in players %}
       <!--  <li class = "list-group-item">{{ player }}</li> -->
             <tr>
-           <td>{{ player }}</td>
+
+           <td><a href="player{{player_namess}}"> {{ player }} </td>
            </tr>
         {% endfor %}
       <!-- </ul> -->

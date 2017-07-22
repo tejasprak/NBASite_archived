@@ -14,6 +14,7 @@ import json
 import pprint
 from nbasite.models import Player
 from nbasite.forms import Name
+from nbasite.forms import GameForm
 from nbasite.models import Page
 from django.views.generic.edit import FormView
 from django.views.decorators.csrf import csrf_exempt
@@ -23,13 +24,43 @@ import re
 import datetime
 import wikipedia
 from wikiapi import WikiApi
+from urllib2 import urlopen
+from django.contrib.staticfiles.templatetags.staticfiles import static
+from bs4 import BeautifulSoup
 
 
 
-def find_scores_for_date(date):
+def scrape_draft_data(year):
+    url = "http://www.basketball-reference.com/draft/NBA_" + str(year) + ".html"
+    html = urlopen(url)
+    soup = BeautifulSoup(html, "lxml")
+    column_headers = [th.getText() for th in
+        soup.findAll('tr', limit=2)[1].findAll('th')]
+    #print column_headers
+    data_rows = soup.findAll('tr')[2:]
+    player_data = [[td.getText() for td in data_rows[i].findAll('td')]
+        for i in range(len(data_rows))]
+    column_headers.pop(0)
+    df = pandas.DataFrame(player_data, columns=column_headers)
+    return df
+def scrape_draft_dataheaders(year):
+    url = "http://www.basketball-reference.com/draft/NBA_" + str(year) + ".html"
+    html = urlopen(url)
+    soup = BeautifulSoup(html, "lxml")
+    column_headers = [th.getText() for th in
+        soup.findAll('tr', limit=2)[1].findAll('th')]
+    #print column_headers
+    data_rows = soup.findAll('tr')[2:]
+    player_data = [[td.getText() for td in data_rows[i].findAll('td')]
+        for i in range(len(data_rows))]
+    column_headers.pop(0)
+    df = pandas.DataFrame(player_data, columns=column_headers)
+    return column_headers
+
+def find_scores_for_date(month, day, year):
     now = datetime.datetime.now()
     print now.year, now.month, now.day, now.hour, now.minute, now.second
-    scoreboard = nba_py.Scoreboard(now.month, now.day, now.year)
+    scoreboard = nba_py.Scoreboard(month,day,year)
     line_score_list = scoreboard.line_score()
     #print line_score_list
     number_of_games = (len(line_score_list))/2
@@ -57,6 +88,55 @@ def find_scores_for_date(date):
         #['resultSets'][0]['rowSet'][0]
         z=z+1
     return all_games
+def find_scores_for_date_dict(month, day, year):
+    now = datetime.datetime.now()
+    print now.year, now.month, now.day, now.hour, now.minute, now.second
+    scoreboard = nba_py.Scoreboard(month,day,year)
+    line_score_list = scoreboard.line_score()
+    #print line_score_list
+    number_of_games = (len(line_score_list))/2
+    #print str(number_of_games) + " games on this day"
+    i = 0
+    games = []
+    while(i != number_of_games):
+        game_id = scoreboard.json['resultSets'][0]['rowSet'][i][2]
+        i = i+1
+        #print game_id
+        games.append(game_id)
+        #print games
+    all_games = {}
+    z = 0
+    for game in games:
+        box = nba_py.game.BoxscoreSummary(str(game))
+        box = box.line_score()
+        box = box.values.tolist()
+        hometeam = box[0][5]
+        awayteam = box[1][5]
+        hometeamscore = box[0][22]
+        awayteamscore =  box[1][22]
+        game_string = awayteam + " " + str(awayteamscore) + " " + hometeam + " " + str(hometeamscore)
+        all_games[game] = game_string
+        #['resultSets'][0]['rowSet'][0]
+        z=z+1
+    return all_games
+def find_gameids_for_date(month, day, year):
+    now = datetime.datetime.now()
+    print now.year, now.month, now.day, now.hour, now.minute, now.second
+    scoreboard = nba_py.Scoreboard(month, day, year)
+    line_score_list = scoreboard.line_score()
+    #print line_score_list
+    number_of_games = (len(line_score_list))/2
+    #print str(number_of_games) + " games on this day"
+    i = 0
+    games = []
+    while(i != number_of_games):
+        game_id = scoreboard.json['resultSets'][0]['rowSet'][i][2]
+        i = i+1
+        #print game_id
+        games.append(game_id)
+        #print games
+
+    return games
 
 def getInfoforPlayer(firstName, lastName):
     playerstats = {}
@@ -97,15 +177,21 @@ def index(request):
     i = 0
     for stat, player in top_ppg_list:
         ppg_list_sentences.append(str(player) + " : " + str(stat))
-        i = i+1
+
+    #for stat, player in top_ppg_list:
+        #ppg_list_sentences.append(str(player) + " : " + str(stat))
+        #print str(player)
+        #i = i+1
     player_name = ''
-
-
-    all_games = find_scores_for_date("5")
+    player_namess = []
+    for stat, player in top_ppg_list:
+        player_namess.append(str(player))
+    now = datetime.datetime.now()
+    all_games = find_scores_for_date(now.month, now.day, now.year)
 
 
     context = RequestContext(request)
-    context_dict = {'playername': player_name, 'playerstatsentence': sentence, 'players': ppg_list_sentences, 'all_games': all_games}
+    context_dict = {'playername': player_name, 'playerstatsentence': sentence, 'players': ppg_list_sentences, 'all_games': all_games, 'player_names': player_namess}
     return render_to_response('nbasite/index.html', context_dict, context)
 def about(request):
     return HttpResponse("We out here")
@@ -212,16 +298,19 @@ def player(request, player_name_url):
         image = "https://nba-players.herokuapp.com/players/" + lastName + "/" +firstName
         player = Player.objects.get(name=player_name)
         thething = eval(player.personalInfo)
-        if int(thething['DRAFT_YEAR']) < 2003:
-            firstName = player.firstName
-            lastName = player.lastName
-            realname = firstName + " " + lastName
-            #wikipagesuggest = wikipedia.suggest('Barack Obama')
-            wiki = WikiApi()
-            results = wiki.find(realname)
-            article = wiki.get_article(results[0])
-            if str(article.image) != 'http:None':
-                image = article.image
+        if str(thething['DRAFT_YEAR']) != "Undrafted":
+            if int(thething['DRAFT_YEAR']) < 2003:
+                firstName = player.firstName
+                lastName = player.lastName
+                realname = firstName + " " + lastName
+                #wikipagesuggest = wikipedia.suggest('Barack Obama')
+                wiki = WikiApi()
+                results = wiki.find(realname)
+                article = wiki.get_article(results[0])
+                if str(article.image) != 'http:None':
+                    image = article.image
+        else:
+            image = "https://nba-players.herokuapp.com/players/" + lastName + "/" +firstName
 
     else:
         player = Player.objects.get(combinedName=player_name)
@@ -239,3 +328,96 @@ def player(request, player_name_url):
 
     # Go render the response and return it to the client.
     return render_to_response('nbasite/player.html', context_dict, context)
+def draft(request, draft_name_url):
+    context = RequestContext(request)
+    context_dict = {'draft_name': draft_name_url}
+    context_dict['LUL'] = "DRAFT"
+    df = scrape_draft_data(int(draft_name_url))
+    headers = scrape_draft_dataheaders(2014)
+    context_dict['headers'] = headers
+    df = df[df.Player.notnull()]
+    df = df.to_html(headers=False)
+    df2 = df.replace('<table border="1" class="dataframe">', "<table class='table table-striped table-hover '>")
+    print df2
+    context_dict['data'] = df2
+    return render_to_response('nbasite/draft.html', context_dict, context)
+
+def game(request, game_url):
+    context = RequestContext(request)
+    context_dict = {'game_name': game_url}
+    game = nba_py.game.Boxscore(game_url)
+    game = game.team_stats()
+    team1 = str(game["TEAM_ABBREVIATION"][0])
+    team1pts = str(game["PTS"][0])
+    team1 = team1.lower()
+    team2 = str(game["TEAM_ABBREVIATION"][1])
+    team2pts= str(game["PTS"][1])
+    team2 = team2.lower()
+    url1 = static("teamimages/" + team1 + ".png")
+    context_dict["team1pts"] = team1pts
+    context_dict["team2pts"] = team2pts
+    url2 = static("teamimages/" + team2 + ".png")
+    context_dict["url1"] = url1
+    context_dict["url2"] = url2
+    game.pop("GAME_ID")
+    game.pop("TEAM_ID")
+    columnss = ["TEAM_CITY", "TEAM_NAME", "PTS", "FGM", "FGA","FG_PCT","FG3M", "FG3A", "FG3_PCT","FTM", "FTA", "FT_PCT","REB","AST","STL","BLK","TO"]
+    game = game.reindex(columns=columnss)
+    game.rename(columns={"TEAM_NAME": 'Team Name', 'TEAM_CITY': 'Team City'}, inplace=True)
+    game = game.to_html()
+    game = game.replace('<table border="1" class="dataframe">', "<table class='table table-striped table-hover '>")
+
+
+    players = nba_py.game.Boxscore(game_url)
+
+    players = players.player_stats()
+    players.pop("GAME_ID")
+    players.pop("TEAM_ID")
+    players.pop("TEAM_CITY")
+    players.pop("PLAYER_ID")
+    players.pop("COMMENT")
+    players.pop("OREB")
+    players.pop("DREB")
+    players.pop("FT_PCT")
+    players.rename(columns={"TEAM_ABBREVIATION": "Team", "PLUS_MINUS":"+/-"}, inplace=True)
+    players = players.to_html()
+    players = players.replace('<table border="1" class="dataframe">', "<table class='table table-striped table-hover '>")
+    context_dict['players'] = players
+    context_dict['game'] = game
+
+    return render_to_response('nbasite/game.html', context_dict, context)
+
+@csrf_exempt
+def game_finder(request):
+    context = RequestContext(request)
+    cd = {}
+    isyes = 0
+    if request.method == "POST":
+        f = GameForm(request.POST)
+        if f.is_valid():
+            #print f
+            cd = f.cleaned_data
+
+            #c = f.save(commit = False)
+            #c.end_date = timezone.now()
+            #c.save()
+    else:
+        isyes = 1
+        f = GameForm()
+        args = {}
+
+        args['form'] = f
+
+    context_dict = {'form': f}
+    if isyes == 0:
+        date = cd['date']
+        print date
+        month = date.month
+        day = date.day
+        year = date.year
+        scores = find_scores_for_date_dict(month,day,year)
+        #gameids = find_gameids_for_date(month,day,year)
+
+        context_dict['scores'] = scores
+        #context_dict['datee'] = date
+    return render_to_response('nbasite/game_finder.html', context_dict, context)
