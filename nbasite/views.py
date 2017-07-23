@@ -336,7 +336,7 @@ def draft(request, draft_name_url):
     headers = scrape_draft_dataheaders(2014)
     context_dict['headers'] = headers
     df = df[df.Player.notnull()]
-    df = df.to_html(headers=False)
+    df = df.to_html()
     df2 = df.replace('<table border="1" class="dataframe">', "<table class='table table-striped table-hover '>")
     print df2
     context_dict['data'] = df2
